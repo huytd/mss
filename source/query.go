@@ -59,6 +59,11 @@ func GetURL(inputUrl string) string {
 			returnUrl := NhacCuaTuiURL(inputUrl)
 			ch <- returnUrl
 		}()
+	} else if strings.Contains(inputUrl, "mp3.zing") {
+		go func() {
+			returnUrl := ZingMp3URL(inputUrl)
+			ch <- returnUrl
+		}()
 	}
 	for {
 		select {
@@ -82,4 +87,11 @@ func NhacCuaTuiURL(inputUrl string) string {
 		return ParseRegEx(xml, `CDATA\[(http:\/\/.*)\]\]`)
 	}
 	return "ERR"
+}
+
+func ZingMp3URL(inputUrl string) string {
+	songId := ParseRegEx(inputUrl, `http\:\/\/mp3\.zing\.vn\/bai\-hat\/.*\/(.*)\.html`)
+	html := GetContent("http://api.mp3.zing.vn/api/mobile/song/getsonginfo?requestdata={\"id\":\"" + songId + "\"}")
+	songUrl := ParseRegEx(html, `\"320\"\:\"(http\:\\\/\\\/api\.mp3\.zing\.vn\\\/api\\\/mobile\\\/source\\\/song\\\/\S[^\"]*)\"`)
+	return strings.Replace(songUrl, `\`, "", -1)
 }

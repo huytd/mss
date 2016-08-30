@@ -10,4 +10,8 @@ func main() {
 	print("Processing... ")
 	curl := source.GetURL("http://chiasenhac.vn/mp3/vietnam/v-pop/gui-anh-xa-nho~bich-phuong~tsvt3v3dqfw2wm.html")
 	print(curl)
+	print("\n\n")
+	print("Processing... ")
+	zurl := source.GetURL("http://mp3.zing.vn/bai-hat/Anh-Dang-Noi-Dau-Miu-Le/ZW7UOFIA.html")
+	print(zurl)
 }
