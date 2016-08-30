@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 func GetHTTP(inputUrl string) *http.Response {
@@ -48,13 +49,12 @@ func ParseRegEx(input string, match string) string {
 
 func GetURL(inputUrl string) string {
 	ch := make(chan string)
-	re := regexp.MustCompile(`chiasenhac`)
-	if re.MatchString(inputUrl) {
+	if strings.Contains(inputUrl, "chiasenhac") {
 		go func() {
 			returnUrl := ChiaSeNhacURL(inputUrl)
 			ch <- returnUrl
 		}()
-	} else {
+	} else if strings.Contains(inputUrl, "nhaccuatui") {
 		go func() {
 			returnUrl := NhacCuaTuiURL(inputUrl)
 			ch <- returnUrl
