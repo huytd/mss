@@ -1,1 +1,20 @@
 Music Stream Server
+-------------------
+
+INSTALLATION:
+  - Download: go get github.com/huytd/mss
+  - MSS will be built automatically and put in your $GOPATH/bin
+  - Make sure you have $GOPATH/bin in your $PATH
+
+RUN:
+  - Clone the MSS-FrontEnd project to www folder
+  - Run: PORT=8080 mss
+
+USING THE API:
+  - To get the direct link to the music file, make a request:
+
+  GET /stream?url=[url-to-music-service]
+
+  - Response data is a JSON object:
+
+  { url: 'http://...' }
