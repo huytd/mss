@@ -37,13 +37,17 @@ func GetHTTP(inputUrl string) *http.Response {
 
 func GetContent(inputUrl string) string {
 	response := GetHTTP(inputUrl)
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
+	if response != nil {
+		b, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return "ERR"
+		}
+		defer response.Body.Close()
+		html := string(b[:])
+		return html
+	} else {
 		return "ERR"
 	}
-	defer response.Body.Close()
-	html := string(b[:])
-	return html
 }
 
 func ParseRegEx(input string, match string) string {
