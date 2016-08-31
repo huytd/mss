@@ -2,10 +2,19 @@ package source
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+)
+
+type (
+	Cache map[string]string
+)
+
+var (
+	CachedURL = make(Cache)
 )
 
 func GetHTTP(inputUrl string) *http.Response {
@@ -40,6 +49,9 @@ func GetContent(inputUrl string) string {
 func ParseRegEx(input string, match string) string {
 	re := regexp.MustCompile(match)
 	matches := re.FindStringSubmatch(input)
+	if len(matches) < 2 {
+		return "ERR"
+	}
 	ret, err := url.QueryUnescape(matches[1])
 	if err != nil {
 		return "ERR"
@@ -49,25 +61,35 @@ func ParseRegEx(input string, match string) string {
 
 func GetURL(inputUrl string) string {
 	ch := make(chan string)
-	if strings.Contains(inputUrl, "chiasenhac") {
-		go func() {
-			returnUrl := ChiaSeNhacURL(inputUrl)
-			ch <- returnUrl
-		}()
-	} else if strings.Contains(inputUrl, "nhaccuatui") {
-		go func() {
-			returnUrl := NhacCuaTuiURL(inputUrl)
-			ch <- returnUrl
-		}()
-	} else if strings.Contains(inputUrl, "mp3.zing") {
-		go func() {
-			returnUrl := ZingMp3URL(inputUrl)
-			ch <- returnUrl
-		}()
+
+	cachedUrl, isCached := CachedURL[inputUrl]
+	if isCached {
+		log.Print("Found cached URL: ", cachedUrl)
+		return cachedUrl
+	} else {
+		log.Print("No cached URL found. Querying...")
+
+		if strings.Contains(inputUrl, "chiasenhac") {
+			go func() {
+				returnUrl := ChiaSeNhacURL(inputUrl)
+				ch <- returnUrl
+			}()
+		} else if strings.Contains(inputUrl, "nhaccuatui") {
+			go func() {
+				returnUrl := NhacCuaTuiURL(inputUrl)
+				ch <- returnUrl
+			}()
+		} else if strings.Contains(inputUrl, "mp3.zing") {
+			go func() {
+				returnUrl := ZingMp3URL(inputUrl)
+				ch <- returnUrl
+			}()
+		}
 	}
 	for {
 		select {
 		case result := <-ch:
+			CachedURL[inputUrl] = result
 			return result
 		}
 	}
