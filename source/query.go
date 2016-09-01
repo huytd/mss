@@ -63,6 +63,21 @@ func ParseRegEx(input string, match string) string {
 	return ret
 }
 
+func ParseRegExAll(input string, match string) [][]string {
+	re := regexp.MustCompile(match)
+	matches := re.FindAllStringSubmatch(input, -1)
+	if len(matches) > 0 {
+		output := make([][]string, len(matches))
+		for i := 0; i < len(matches); i++ {
+			if len(matches[i]) > 1 {
+				output[i] = matches[i][1:]
+			}
+		}
+		return output
+	}
+	return [][]string{}
+}
+
 func GetURL(inputUrl string) string {
 	ch := make(chan string)
 

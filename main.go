@@ -44,6 +44,25 @@ func streamFunc(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func searchFunc(w http.ResponseWriter, r *http.Request) {
+	query := r.FormValue("query")
+	log.Print("Search for: ", query)
+	searchTerm := strings.Replace(query, " ", "+", -1)
+	searchContent := source.GetContent("http://search.chiasenhac.vn/search.php?s=" + searchTerm)
+	matches := source.ParseRegExAll(searchContent, `\<div\ class\=\"tenbh\"\>\s*\<p\>\<a\ href\=\"(.*)\"\ class.*\>(.*)\<\/a\>\<\/p>\s*\<p\>(.*)\<\/p>\s*\<\/div\>`)
+	data, err := json.Marshal(Map{
+		"content": matches,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
 func main() {
 	port := envString("PORT", "3333")
 
@@ -51,6 +70,7 @@ func main() {
 
 	http.Handle("/", fs)
 	http.HandleFunc("/stream", streamFunc)
+	http.HandleFunc("/search", searchFunc)
 
 	log.Println("Server running at http://localhost:" + port)
 	http.ListenAndServe(":"+port, nil)
