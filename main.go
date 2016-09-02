@@ -48,10 +48,17 @@ func searchFunc(w http.ResponseWriter, r *http.Request) {
 	query := r.FormValue("query")
 	log.Print("Search for: ", query)
 	searchTerm := strings.Replace(query, " ", "+", -1)
-	searchContent := source.GetContent("http://search.chiasenhac.vn/search.php?s=" + searchTerm)
-	matches := source.ParseRegExAll(searchContent, `\<div\ class\=\"tenbh\"\>\s*\<p\>\<a\ href\=\"(.*)\"\ class.*\>(.*)\<\/a\>\<\/p>\s*\<p\>(.*)\<\/p>\s*\<\/div\>`)
+	csnSearchContent := source.GetContent("http://search.chiasenhac.vn/search.php?s=" + searchTerm)
+	csnMatches := source.ParseRegExAll(csnSearchContent, `\<div\ class\=\"tenbh\"\>\s*\<p\>\<a\ href\=\"(.*)\"\ class.*\>(.*)\<\/a\>\<\/p>\s*\<p\>(.*)\<\/p>\s*\<\/div\>`)
+
+	zingSearchContent := source.GetContent("http://mp3.zing.vn/tim-kiem/bai-hat.html?q=" + searchTerm)
+	zingMatches := source.ParseRegExAll(zingSearchContent, `\<div\ class=\"title\-song\"\>.*?href=\"(http:\/\/.*?\.html)\".*?\>(.*?)\<\/a.*?\<a.*?\>(.*?)\<\/.*?\<\/a.*?quanlity.*?\>(.*?)\<\/span.*?div\>`)
+
 	data, err := json.Marshal(Map{
-		"content": matches,
+		"content": Map{
+			"csn":  csnMatches,
+			"zing": zingMatches,
+		},
 	})
 
 	if err != nil {
